@@ -1,0 +1,18 @@
+name = "one12"
+version = "0.1.0"
+defaultTargets = ["One12"]
+
+[[lean_lib]]
+name = "One12"
+roots = ["One12"]
+srcDir = "src"
+
+[[lean_exe]]
+name = "one12"
+root = "Main"
+srcDir = "src"
+
+[[require]]
+name = "mathlib"
+scope = "import"
+source = { git = "https://github.com/leanprover-community/mathlib4.git", rev = "v4.10.0" }
