@@ -65,6 +65,14 @@ Saturation makes cloud, cloud base = dew point height.
 Lapse: colder further up, less mass to heat during day.
 Snow is height: water stored at height, frozen, river later.
 
+## Tributary + Flow — LOCKED
+Tributary: Void holds, Overflow to nearest below, Network = chain of dishes, SeaLevel collects all.
+Tidal: river down + tide up = flood sideways. NS blow up = tidal collision. RH floods sideways too.
+LOCK: No mass, no water, no ice. It can be 100 below. Cold alone does NOT make ice. You need water for ice or snow.
+Lava boundary: lava and water don't mix, water can't compete with heavy metals in hot rock, steam is boundary.
+Springs: driven by earth core temps, rise from deep, top down + bottom up = circulation.
+Flow (1,1): Divisors as watersheds, Lefschetz, 4 properties for k=1. Flow general (k,k) = Later, open, equivalent to Hodge.
+
 ## Files
 - Basic.lean — LOCKED (in repo)
 - Uni.lean — MassBudget, first construction
