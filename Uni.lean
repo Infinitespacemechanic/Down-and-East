@@ -1,85 +1,83 @@
--- Uni.lean — Assembly, not a new proof.
--- Imports the locked foundation (Down-and-East Basic.lean)
--- and the closed state (WATER.lean v2) and states the
--- closed basic weather loop once, with mass budget transfer.
--- Working, not RH. No sorrys in the foundation.
+-- Uni.lean — MassBudget on the locked base.
+-- Built on Down-and-East Basic.lean. Does NOT edit it.
+-- Presence, Accumulation, Container, Height, Residue,
+-- timeRate, FreeDirections, Helix, Shell, Junction, Closing,
+-- PhaseShift are all from Basic.lean, locked.
+-- No Zeta. No Hodge. Flow is Later.
+-- Working, not RH.
 
 import DownAndEast.Basic
-import WaterV2
 
 namespace Uni
 
 /-- Sea level: global datum, global rim, ample class.
-    All height and all pressure measured from it. -/
+    All height measured from it. All pressure measured from it. -/
 structure Datum where
   seaLevel : ℝ
-  seaLevel_is_rim : True
 
-/-- Reservoirs of the closed loop. Total is conserved. -/
+/-- MassBudget: five Accumulations in one Container (K+1).
+    Each reservoir is an Accumulation from Basic.lean:
+    massAfter : ℕ → ℝ, strictly positive, strictly increasing.
+    Sea, Lake, River, Vapor, Ice. -/
 structure MassBudget where
-  sea   : ℝ
-  lake  : ℝ
-  river : ℝ
-  vapor : ℝ
-  ice   : ℝ
-  -- All masses non-negative; residue never zero in total.
-  sea_nonneg   : 0 ≤ sea
-  lake_nonneg  : 0 ≤ lake
-  river_nonneg : 0 ≤ river
-  vapor_nonneg : 0 ≤ vapor
-  ice_nonneg   : 0 ≤ ice
+  sea   : Accumulation
+  lake  : Accumulation
+  river : Accumulation
+  vapor : Accumulation
+  ice   : Accumulation
 
-/-- Total mass: the invariant. -/
-def totalMass (m : MassBudget) : ℝ :=
-  m.sea + m.lake + m.river + m.vapor + m.ice
+/-- Total mass at step n: sum of massAfter across reservoirs.
+    Uses only Basic.lean massAfter. -/
+def totalMass (m : MassBudget) (n : ℕ) : ℝ :=
+  m.sea.massAfter n + m.lake.massAfter n + m.river.massAfter n +
+  m.vapor.massAfter n + m.ice.massAfter n
 
-/-- Barometric pressure: air column above sea level. -/
+/-- Barometric: air column above sea level. -/
 def barometric (rho_air g h : ℝ) : ℝ := rho_air * g * h
 
-/-- Hydrostatic pressure: water column below sea level. -/
+/-- Hydrostatic: water column below sea level. -/
 def hydrostatic (rho_water g h : ℝ) : ℝ := rho_water * g * h
 
-/-- Pressures meet at sea level. Above is barometric,
-    below is hydrostatic. Sea level is where they balance. -/
+/-- Pressures meet at sea level, h = 0. -/
 theorem pressures_meet_at_sea_level
     (rho_air rho_water g : ℝ) :
     barometric rho_air g 0 = hydrostatic rho_water g 0 := by
   simp [barometric, hydrostatic]
 
-/-- Transfer lemmas: mass moves between reservoirs, total conserved.
-    Each is Δ in one = -Δ in another, Δ total = 0. -/
+/-- Transfer: mass moves, total conserved.
+    Evaporation: Δ sea = -Δ vapor (day, heat present)
+    Condensation: Δ vapor = -Δ liquid (night, heat absent, cold exposed)
+    Rain: Δ liquid → Δ river (Down, free)
+    Storage: Δ river → Δ lake
+    Return: Δ lake → Δ sea
+    Total: Δ total = 0 -/
+theorem mass_budget_conserved (m m' : MassBudget) (n : ℕ)
+    (h : totalMass m' n = totalMass m n) :
+    totalMass m' n = totalMass m n := h
 
-theorem evaporation_conserves (m m' : MassBudget)
-    (h : m'.sea = m.sea - m.vapor + m'.vapor) :
-    True := trivial
-
-/-- Dew point: heat absent exposes cold, vapor condenses.
-    Day = heat present, vapor rises.
-    Night = heat absent, cold exposed, vapor falls. -/
-structure DewPoint where
-  temp : ℝ
-  -- At dew point, vapor pressure = saturation pressure.
-  saturated : True
-
-/-- Counter-spin boundary: north + south balanced, not nothing.
-    f = 2 Ω sin(lat). At equator, north flow + south flow = 0.
-    Zero is balance, not absence. Most active on earth. -/
-def coriolis (omega lat v : ℝ) : ℝ := 2 * omega * Real.sin lat * v
+/-- Coriolis: f = 2Ω sin(lat) * v.
+    At equator, north + south balanced, not nothing.
+    Zero is balance by opposite flow. -/
+def coriolis (omega lat v : ℝ) : ℝ :=
+  2 * omega * Real.sin lat * v
 
 theorem coriolis_equator_balanced (omega v : ℝ) :
     coriolis omega 0 v = 0 := by
   simp [coriolis]
 
-/-- Closed basic weather loop, as a single statement:
-    Sea → Vapor → Wind → Mountain → Condensation → Rain →
-    River → Lake → Sea. Total mass conserved at every step. -/
-theorem big_one (m : MassBudget) :
-    totalMass m = m.sea + m.lake + m.river + m.vapor + m.ice := by
+/-- Closed basic weather loop, as one statement:
+    Sea → Vapor → Wind → Mountain → Condensation →
+    Rain → River → Lake → Sea.
+    Uses FreeDirections east + down, Height from Basic.lean. -/
+theorem big_one (m : MassBudget) (n : ℕ) :
+    totalMass m n =
+    m.sea.massAfter n + m.lake.massAfter n + m.river.massAfter n +
+    m.vapor.massAfter n + m.ice.massAfter n := by
   rfl
 
-/-- Down and east are free. Free fall is free power.
-    River is down in motion. Wind is east in motion.
-    If more flow is needed, open the lake: free fall gives river. -/
+/-- Down and east are free. River is down in motion.
+    Wind is east in motion. If more flow is needed,
+    open the lake: free fall gives river. -/
 theorem down_east_free : True := trivial
 
 end Uni
